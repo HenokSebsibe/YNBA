@@ -1,6 +1,7 @@
 package com.example.expenceiq.data.api;
 
-import com.example.expenceiq.data.model.AdminDashboardResponse;
+import java.util.List;
+import com.example.expenceiq.data.model.Company;
 import com.example.expenceiq.data.model.UserListResponse;
 import java.util.Map;
 import retrofit2.Call;
@@ -19,8 +20,8 @@ public interface AdminApiService {
     @GET("api/admin/users")
     Call<UserListResponse> getUsers(@Header("Authorization") String token);
 
-    @DELETE("api/admin/user/{id}")
-    Call<Map<String, Object>> deleteUser(@Header("Authorization") String token, @Path("id") int userId);
+    @GET("api/admin/companies")
+    Call<List<Company>> getCompanies(@Header("Authorization") String token);
 
     @PUT("api/admin/user/{id}/role")
     Call<Map<String, Object>> updateUserRole(@Header("Authorization") String token, @Path("id") int userId, @Body Map<String, String> roleData);

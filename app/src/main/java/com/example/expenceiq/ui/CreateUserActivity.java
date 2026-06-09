@@ -1,5 +1,10 @@
 package com.example.expenceiq.ui;
 
+import android.widget.Spinner;
+import java.util.List;
+import android.widget.ArrayAdapter;
+import com.example.expenceiq.data.model.Company;
+
 // Standard Android imports
 import android.os.Bundle;
 import android.widget.EditText;
@@ -45,6 +50,7 @@ public class CreateUserActivity extends AppCompatActivity {
         etUsername = findViewById(R.id.etUsername);
         etEmail = findViewById(R.id.etEmail);
         etPassword = findViewById(R.id.etPassword);
+        spinnerCompany = findViewById(R.id.spinnerCompany);
 
         // Initialize Retrofit specifically for the Admin API
         // Using 10.0.2.2 to point to the host machine's localhost from the emulator
@@ -54,14 +60,41 @@ public class CreateUserActivity extends AppCompatActivity {
                 .build();
         
         adminApiService = retrofit.create(AdminApiService.class);
+        loadCompanies();
 
         // Set click listener for the submit button
         findViewById(R.id.btnSubmit).setOnClickListener(v -> performCreateUser());
     }
 
+    private void loadCompanies() {
+        String token = "Bearer " + sessionManager.fetchAuthToken();
+        adminApiService.getCompanies(token).enqueue(new Callback<List<Company>>() {
+            @Override
+            public void onResponse(@NonNull Call<List<Company>> call, @NonNull Response<List<Company>> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    companyList = response.body();
+                    // Populate spinner with Company objects; Company.toString() returns name
+                    ArrayAdapter<Company> adapter = new ArrayAdapter<>(CreateUserActivity.this,
+                            android.R.layout.simple_spinner_item, companyList);
+                    adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                    spinnerCompany.setAdapter(adapter);
+                } else {
+                    Toast.makeText(CreateUserActivity.this, "Failed to load companies", Toast.LENGTH_SHORT).show();
+                }
+            }
+            @Override
+            public void onFailure(@NonNull Call<List<Company>> call, @NonNull Throwable t) {
+                Toast.makeText(CreateUserActivity.this, "Network error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
     /**
      * Gathers input data and calls the backend API to create a user.
      */
+    private Spinner spinnerCompany;
+    private List<Company> companyList;
+
     private void performCreateUser() {
         String username = etUsername.getText().toString().trim();
         String email = etEmail.getText().toString().trim();
@@ -79,7 +112,9 @@ public class CreateUserActivity extends AppCompatActivity {
         userData.put("email", email);
         userData.put("password", password);
         userData.put("role_name", "USER"); // Per requirement: Admin creates regular users
-        userData.put("company_id", sessionManager.getCompanyId());
+        // Use selected company from spinner
+        int selectedCompanyId = ((Company)spinnerCompany.getSelectedItem()).getId();
+        userData.put("company_id", selectedCompanyId);
 
         // Construct Authorization Header
         String savedToken = sessionManager.fetchAuthToken();

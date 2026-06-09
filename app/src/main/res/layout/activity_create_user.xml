@@ -55,11 +55,14 @@
         android:layout_marginTop="16dp"
         android:textColor="#666666"/>
 
-    <Button
+
+    <Spinner
+        android:id="@+id/spinnerCompany"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"/>\n\n    <Button
         android:id="@+id/btnSubmit"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Create User"
-        android:layout_marginTop="32dp"/>
-
-</LinearLayout>
+        android:layout_marginTop="32dp"/>\n\n</LinearLayout>
